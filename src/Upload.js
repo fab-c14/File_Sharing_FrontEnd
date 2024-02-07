@@ -19,8 +19,37 @@ const Upload = () => {
     };
 
     const handleUpload = () => {
-        // Implement file upload logic
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('password', password);
+            formData.append('expiryDate', expiryDate);
+    
+            fetch('https://3002-fabc14-filesharing-ysd56aovepz.ws-us108.gitpod.io/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('File uploaded successfully:', data);
+                // Add any additional logic here, such as updating UI
+            })
+            .catch(error => {
+                console.error('Error uploading file:', error);
+                // Handle error, display message to user, etc.
+            });
+        } else {
+            console.error('No file selected');
+            // Display message to user indicating that no file is selected
+        }
     };
+    
+    
 
     return (
         <div className="container">
