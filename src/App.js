@@ -1,18 +1,18 @@
-import React from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'tachyons';
 import Upload from './Upload';
+import FileAccess from './FileAccess';
 
-function App() {
-  return (
-    <div className="App d-flex justify-content-center align-items-center">
-      <div className="text-center">
-        <h1>File Sharing Platform</h1>
-        <Upload />
-      </div>
-    </div>
-  );
-}
+const App = () => {
+    return (
+        <div>
+            <h1>File Sharing App</h1>
+            <Upload />
+            <FileAccess />
+        </div>
+    );
+};
 
 export default App;
+

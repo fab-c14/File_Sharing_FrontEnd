@@ -1,73 +1,88 @@
 // server.js
 const express = require('express');
+const mongoose = require('mongoose');
 const multer = require('multer');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const cors = require('cors')
+const jwt = require('jsonwebtoken');
+const File = require('./models/File');
+
 const app = express();
 const port = 3002;
-app.use(cors())
 
-// Sample file data with hashed passwords and expiry dates
-const files = [
-    { name: 'file1.txt', passwordHash: '$2b$10$j1MldTK9JmlJ4rNRd0Ij1u4l/.Sjn8QswXxQKq0L4NBp5l5x3WT4O', expiryDate: null }, // Password: secret
-    { name: 'file2.txt', passwordHash: null, expiryDate: new Date('2024-02-20T12:00:00') } // No password, expires on Feb 20, 2024
-];
+// MongoDB connection
+mongoose.connect('<your-mongodb-atlas-connection-string>', { useNewUrlParser: true, useUnifiedTopology: true });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+    console.log('Connected to MongoDB Atlas');
+});
 
-// Configure multer for handling file uploads
+// Multer configuration for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/')
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname)
+        cb(null, Date.now() + '-' + file.originalname)
     }
 });
 const upload = multer({ storage: storage });
 
-// Middleware for parsing application/json
-app.use(bodyParser.json());
+// Route for file upload
+app.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+        // Get file details from request
+        const { filename, path, expiryDate, password } = req.body;
 
-// Route for handling file uploads
-app.post('/upload', upload.single('file'), (req, res) => {
-    const { file, body: { password, expiryDate } } = req;
+        // Hash password if provided
+        let passwordHash = null;
+        if (password) {
+            passwordHash = await bcrypt.hash(password, 10);
+        }
 
-    // Check if a password is provided
-    if (password) {
-        // Hash the password
-        bcrypt.hash(password, 10, (err, passwordHash) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error hashing password' });
-            }
-            // Store file data with hashed password and expiry date
-            files.push({ name: file.originalname, passwordHash, expiryDate });
-            console.log('File uploaded successfully with password');
-            res.status(200).json({ message: 'File uploaded successfully with password' });
-        });
-    } else {
-        // Store file data with no password and expiry date
-        files.push({ name: file.originalname, passwordHash: null, expiryDate });
-        console.log('File uploaded successfully');
-        res.status(200).json({ message: 'File uploaded successfully' });
+        // Create access link (you can use a random token)
+        const accessLink = jwt.sign({ filename }, 'secret');
+
+        // Save file metadata to MongoDB
+        const file = new File({ filename, path, expiryDate, passwordHash, accessLink });
+        await file.save();
+
+        res.status(201).json({ message: 'File uploaded successfully', accessLink });
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Route for handling file access
-app.get('/files/:filename', (req, res) => {
-    const { filename } = req.params;
-    const fileData = files.find(f => f.name === filename);
+// Route for file access
+app.get('/files/:accessLink', async (req, res) => {
+    try {
+        const { accessLink } = req.params;
 
-    if (!fileData) {
-        return res.status(404).json({ error: 'File not found' });
+        // Find file by access link
+        const file = await File.findOne({ accessLink });
+
+        // Check if file exists
+        if (!file) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        // Check expiry date
+        if (file.expiryDate && new Date() > file.expiryDate) {
+            return res.status(403).json({ error: 'File link has expired' });
+        }
+
+        // If file is password protected, return response indicating password is required
+        if (file.passwordHash) {
+            return res.status(401).json({ error: 'Password is required to access the file' });
+        }
+
+        // Add logic to send file to client
+        res.status(200).json({ message: 'File accessed successfully' });
+    } catch (error) {
+        console.error('Error accessing file:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    // Check if file has expired
-    if (fileData.expiryDate && new Date() > new Date(fileData.expiryDate)) {
-        return res.status(403).json({ error: 'File link has expired' });
-    }
-
-    // Add logic to send file to client
-    res.status(200).json({ message: 'File accessed successfully' });
 });
 
 app.listen(port, () => {

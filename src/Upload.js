@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 
 const Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -24,8 +23,8 @@ const Upload = () => {
             formData.append('file', selectedFile);
             formData.append('password', password);
             formData.append('expiryDate', expiryDate);
-    
-            fetch('https://3002-fabc14-filesharing-ysd56aovepz.ws-us108.gitpod.io/upload', {
+
+            fetch('http://localhost:3002/upload', {
                 method: 'POST',
                 body: formData
             })
@@ -48,26 +47,24 @@ const Upload = () => {
             // Display message to user indicating that no file is selected
         }
     };
-    
-    
 
     return (
         <div className="container">
             <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="form-group">
+                <div className="col-md-6 mt-3">
+                    <div className="form-group mt-3">
                         <label htmlFor="fileInput">Choose File</label>
                         <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group mt-3">
                         <label htmlFor="passwordInput">Password (Optional)</label>
                         <input type="password" className="form-control" id="passwordInput" value={password} onChange={handlePasswordChange} />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group mt-3">
                         <label htmlFor="expiryDateInput">Expiry Date and Time (Optional)</label>
                         <input type="datetime-local" className="form-control" id="expiryDateInput" value={expiryDate} onChange={handleExpiryDateChange} />
                     </div>
-                    <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
+                    <button className="btn btn-primary mt-3" onClick={handleUpload}>Upload</button>
                 </div>
             </div>
         </div>
