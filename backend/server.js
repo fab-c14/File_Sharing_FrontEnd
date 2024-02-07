@@ -5,12 +5,14 @@ const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const File = require('./models/File');
+const cors = require('cors')
+const path = require('path');
 
 const app = express();
 const port = 3002;
-
+app.use(cors())
 // MongoDB connection
-mongoose.connect('<your-mongodb-atlas-connection-string>', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://filesharing:YxOZDGOeDNgGPhXv@cluster0.3cwuykf.mongodb.net/?retryWrites=true&w=majority');
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
@@ -41,9 +43,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         }
 
         // Create access link (you can use a random token)
-        const accessLink = jwt.sign({ filename }, 'secret');
+        const accessLink = jwt.sign({ filename }, passwordHash);
 
-        // Save file metadata to MongoDB
+        
         const file = new File({ filename, path, expiryDate, passwordHash, accessLink });
         await file.save();
 
@@ -54,6 +56,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
+
 // Route for file access
 app.get('/files/:accessLink', async (req, res) => {
     try {
@@ -61,7 +64,15 @@ app.get('/files/:accessLink', async (req, res) => {
 
         // Find file by access link
         const file = await File.findOne({ accessLink });
-
+        // console.log(file.accessLink)
+        jwt.verify(file.accessLink,'secret',(err,decoded)=>{
+            if(err){
+                console.log(err)
+            }
+            else{
+                console.log(decoded)
+            }
+        })
         // Check if file exists
         if (!file) {
             return res.status(404).json({ error: 'File not found' });
@@ -77,14 +88,15 @@ app.get('/files/:accessLink', async (req, res) => {
             return res.status(401).json({ error: 'Password is required to access the file' });
         }
 
-        // Add logic to send file to client
-        res.status(200).json({ message: 'File accessed successfully' });
+        // Serve the file content
+        res.sendFile(path.resolve(__dirname, 'uploads', file.filename));
     } catch (error) {
         console.error('Error accessing file:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
+
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+    console.log(`Server is listening on port http://localhost:${port}`);
 });

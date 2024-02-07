@@ -24,7 +24,7 @@ const Upload = () => {
             formData.append('password', password);
             formData.append('expiryDate', expiryDate);
 
-            fetch('http://localhost:3002/upload', {
+            fetch('https://3002-fabc14-filesharing-ysd56aovepz.ws-us108.gitpod.io/upload', {
                 method: 'POST',
                 body: formData
             })
@@ -53,8 +53,9 @@ const Upload = () => {
             <div className="row justify-content-center">
                 <div className="col-md-6 mt-3">
                     <div className="form-group mt-3">
-                        <label htmlFor="fileInput">Choose File</label>
+                        <label htmlFor="fileInput">
                         <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
+                        </label>
                     </div>
                     <div className="form-group mt-3">
                         <label htmlFor="passwordInput">Password (Optional)</label>

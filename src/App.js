@@ -6,7 +6,7 @@ import FileAccess from './FileAccess';
 
 const App = () => {
     return (
-        <div>
+        <div className='App'>
             <h1>File Sharing App</h1>
             <Upload />
             <FileAccess />
