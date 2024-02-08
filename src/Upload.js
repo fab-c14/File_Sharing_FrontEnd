@@ -4,6 +4,7 @@ const Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [password, setPassword] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -18,44 +19,48 @@ const Upload = () => {
     };
 
     const handleUpload = () => {
-        if (selectedFile) {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('password', password);
-            formData.append('expiryDate', expiryDate);
-
-            fetch('https://3002-fabc14-filesharing-ysd56aovepz.ws-us108.gitpod.io/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('File uploaded successfully:', data);
-                // Add any additional logic here, such as updating UI
-            })
-            .catch(error => {
-                console.error('Error uploading file:', error);
-                // Handle error, display message to user, etc.
-            });
-        } else {
-            console.error('No file selected');
-            // Display message to user indicating that no file is selected
+        if (!selectedFile) {
+            setErrorMessage('Please select a file');
+            return;
         }
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('password', password);
+        formData.append('expiryDate', expiryDate);
+
+        fetch('https://3002-fabc14-filesharing-py16ytglgyo.ws-us108.gitpod.io/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('File uploaded successfully:', data);
+            // Add any additional logic here, such as updating UI
+            setSelectedFile(null);
+            setPassword('');
+            setExpiryDate('');
+            setErrorMessage('');
+        })
+        .catch(error => {
+            console.error('Error uploading file:', error);
+            setErrorMessage('Error uploading file. Please try again.');
+        });
     };
 
     return (
         <div className="container">
             <div className="row justify-content-center">
                 <div className="col-md-6 mt-3">
+                    {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                     <div className="form-group mt-3">
-                        <label htmlFor="fileInput">
+                        <label htmlFor="fileInput">Choose File</label>
                         <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
-                        </label>
                     </div>
                     <div className="form-group mt-3">
                         <label htmlFor="passwordInput">Password (Optional)</label>

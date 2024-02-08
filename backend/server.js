@@ -1,16 +1,16 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const File = require('./models/File');
-const cors = require('cors')
+const cors = require('cors');
 const path = require('path');
 
 const app = express();
 const port = 3002;
-app.use(cors())
+app.use(cors());
+
 // MongoDB connection
 mongoose.connect('mongodb+srv://filesharing:YxOZDGOeDNgGPhXv@cluster0.3cwuykf.mongodb.net/?retryWrites=true&w=majority');
 const db = mongoose.connection;
@@ -22,31 +22,25 @@ db.once('open', () => {
 // Multer configuration for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/')
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname)
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
+
 const upload = multer({ storage: storage });
 
 // Route for file upload
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
-        // Get file details from request
-        const { filename, path, expiryDate, password } = req.body;
+        const { filename, path: filePath } = req.file;
+        const { expiryDate, password } = req.body;
 
-        // Hash password if provided
-        let passwordHash = null;
-        if (password) {
-            passwordHash = await bcrypt.hash(password, 10);
-        }
-
-        // Create access link (you can use a random token)
+        const passwordHash = password ? await bcrypt.hash(password, 10) : null;
         const accessLink = jwt.sign({ filename }, passwordHash);
 
-        
-        const file = new File({ filename, path, expiryDate, passwordHash, accessLink });
+        const file = new File({ filename, path: filePath, expiryDate, passwordHash, accessLink });
         await file.save();
 
         res.status(201).json({ message: 'File uploaded successfully', accessLink });
@@ -57,44 +51,48 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 
-// Route for file access
-app.get('/files/:accessLink', async (req, res) => {
+app.get('/uploads/:accessLink', async (req, res) => {
     try {
-        const { accessLink } = req.params;
+        const { filename } = req.params;
+        const { password } = req.query;
+        
+        const file = await File.findOne({ filename });
 
-        // Find file by access link
-        const file = await File.findOne({ accessLink });
-        // console.log(file.accessLink)
-        jwt.verify(file.accessLink,'secret',(err,decoded)=>{
-            if(err){
-                console.log(err)
-            }
-            else{
-                console.log(decoded)
-            }
-        })
-        // Check if file exists
         if (!file) {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        // Check expiry date
         if (file.expiryDate && new Date() > file.expiryDate) {
             return res.status(403).json({ error: 'File link has expired' });
         }
 
-        // If file is password protected, return response indicating password is required
         if (file.passwordHash) {
-            return res.status(401).json({ error: 'Password is required to access the file' });
+            if (!password) {
+                return res.status(401).json({ error: 'Password is required to access the file' });
+            }
+
+            const passwordMatch = await bcrypt.compare(password, file.passwordHash);
+        
+            if (!passwordMatch) {
+                return res.status(401).json({ error: 'Incorrect password' });
+            }
         }
 
-        // Serve the file content
-        res.sendFile(path.resolve(__dirname, 'uploads', file.filename));
+        // Send the file using the absolute path
+        const filePath = path.resolve(__dirname, 'uploads', file.filename);
+
+        // Set appropriate headers for file download
+        res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+
+        res.sendFile(filePath);
+
     } catch (error) {
         console.error('Error accessing file:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 
 app.listen(port, () => {
