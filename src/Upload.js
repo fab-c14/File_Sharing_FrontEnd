@@ -5,6 +5,7 @@ const Upload = () => {
     const [password, setPassword] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [uploadLink, setUploadLink] = useState('');
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -41,8 +42,7 @@ const Upload = () => {
         })
         .then(data => {
             console.log('File uploaded successfully:', data);
-            setErrorMessage(data);
-            // Add any additional logic here, such as updating UI
+            setUploadLink(data.accessLink); // Store the upload link in state
             setSelectedFile(null);
             setPassword('');
             setExpiryDate('');
@@ -59,6 +59,11 @@ const Upload = () => {
             <div className="row justify-content-center">
                 <div className="col-md-6 mt-3">
                     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+                    {uploadLink && ( // Display the link if it exists
+                        <div className="alert alert-success">
+                            File uploaded successfully. Access link: <a href={uploadLink}>{uploadLink}</a>
+                        </div>
+                    )}
                     <div className="form-group mt-3">
                         <label htmlFor="fileInput">
                         <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
