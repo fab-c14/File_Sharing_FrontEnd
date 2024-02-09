@@ -1,11 +1,11 @@
-const express = require('express');
 const mongoose = require('mongoose');
-const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const File = require('./models/File');
-const cors = require('cors');
 const path = require('path');
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
 
 const app = express();
 const port = 3002;
@@ -31,14 +31,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Route for file upload
+app.get('/', (req, res) => {
+    res.json("hello world");
+});
+
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
         const { filename, path: filePath } = req.file;
         const { expiryDate, password } = req.body;
 
-        const passwordHash = password ? await bcrypt.hash(password, 10) : null;
-        const accessLink = jwt.sign({ filename }, passwordHash);
+        let passwordHash = null;
+        if (password) {
+            passwordHash = await bcrypt.hash(password, 10);
+        }
+
+        const accessLink = jwt.sign({ filename, expiryDate }, passwordHash || '');
 
         const file = new File({ filename, path: filePath, expiryDate, passwordHash, accessLink });
         await file.save();
@@ -50,13 +57,12 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-
-app.get('/uploads/:accessLink', async (req, res) => {
+app.get('/files/:accessLink', async (req, res) => {
     try {
-        const { filename } = req.params;
+        const { accessLink } = req.params;
         const { password } = req.query;
         
-        const file = await File.findOne({ filename });
+        const file = await File.findOne({ accessLink });
 
         if (!file) {
             return res.status(404).json({ error: 'File not found' });
@@ -78,13 +84,22 @@ app.get('/uploads/:accessLink', async (req, res) => {
             }
         }
 
-        // Send the file using the absolute path
         const filePath = path.resolve(__dirname, 'uploads', file.filename);
 
-        // Set appropriate headers for file download
-        res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
-        res.setHeader('Content-Type', 'application/octet-stream');
+        // Get the file extension
+        const fileExtension = path.extname(file.filename);
 
+        // Set appropriate content type based on file extension
+        const contentType = getContentType(fileExtension);
+        if (!contentType) {
+            return res.status(500).json({ error: 'Unsupported file type' });
+        }
+
+        // Set headers for previewing the file
+        res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
+        res.setHeader('Content-Type', contentType);
+
+        // Send the file
         res.sendFile(filePath);
 
     } catch (error) {
@@ -93,6 +108,33 @@ app.get('/uploads/:accessLink', async (req, res) => {
     }
 });
 
+// Function to get content type based on file extension
+function getContentType(fileExtension) {
+    switch (fileExtension) {
+        case '.pdf':
+            return 'application/pdf';
+        case '.doc':
+        case '.docx':
+            return 'application/msword';
+        case '.xls':
+        case '.xlsx':
+            return 'application/vnd.ms-excel';
+        case '.jpg':
+        case '.jpeg':
+            return 'image/jpeg';
+        case '.png':
+            return 'image/png';
+        case '.gif':
+            return 'image/gif';
+        case '.mp4':
+            return 'video/mp4';
+        case '.avi':
+            return 'video/x-msvideo';
+        // Add more cases for other file types as needed
+        default:
+            return null; // Unknown file type
+    }
+}
 
 
 app.listen(port, () => {

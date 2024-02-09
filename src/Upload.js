@@ -29,7 +29,7 @@ const Upload = () => {
         formData.append('password', password);
         formData.append('expiryDate', expiryDate);
 
-        fetch('https://3002-fabc14-filesharing-py16ytglgyo.ws-us108.gitpod.io/upload', {
+        fetch('https://3002-fabc14-filesharing-x7esvkougck.ws-us108.gitpod.io/upload', {
             method: 'POST',
             body: formData
         })
@@ -41,6 +41,7 @@ const Upload = () => {
         })
         .then(data => {
             console.log('File uploaded successfully:', data);
+            setErrorMessage(data);
             // Add any additional logic here, such as updating UI
             setSelectedFile(null);
             setPassword('');
@@ -59,8 +60,9 @@ const Upload = () => {
                 <div className="col-md-6 mt-3">
                     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                     <div className="form-group mt-3">
-                        <label htmlFor="fileInput">Choose File</label>
+                        <label htmlFor="fileInput">
                         <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
+                        </label>
                     </div>
                     <div className="form-group mt-3">
                         <label htmlFor="passwordInput">Password (Optional)</label>

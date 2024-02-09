@@ -12,45 +12,40 @@ const FileAccess = () => {
     const handlePasswordChange = (event) => {
         setPassword(event.target.value);
     };
+
     const handleFileAccess = () => {
         if (link.trim() === '') {
             setErrorMessage('Please enter a valid access link');
             return;
         }
     
-        const requestData = {
-            link,
-            password // Include the password in the request data
-        };
-    
-        fetch(`https://3002-fabc14-filesharing-py16ytglgyo.ws-us108.gitpod.io/files/${link}`, {
-            method: 'POST', // Change the method to POST
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
+        fetch(`https://3002-fabc14-filesharing-x7esvkougck.ws-us108.gitpod.io/files/${link}?password=${password}`, {
+            method: 'GET', // Change the method to GET
         })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();
+            console.log(response)
+            // Return the blob data and filename
+            return response.blob().then(blob => ({ blob}));
         })
-        .then(data => {
-            console.log('File accessed successfully:', data);
-            // Add logic to handle file access
+        .then(({ blob }) => {
+            // Check if the blob data is valid
+            if (!blob || !blob.size) {
+                throw new Error('Invalid blob data');
+            }
+            // Create a blob URL to display the file
+            const url = URL.createObjectURL(blob);
+            // Open the file in a new tab
+            window.open(url, '_blank');
+            // Revoke the blob URL to release memory
+            URL.revokeObjectURL(url);
         })
         .catch(error => {
             console.error('Error accessing file:', error);
             if (error.message === 'Password is required to access the file') {
-                // Prompt the user to enter the password and retry the request
-                const enteredPassword = prompt('Password is required to access the file. Please enter the password:');
-                if (enteredPassword) {
-                    setPassword(enteredPassword);
-                    handleFileAccess(); // Retry the request with the entered password
-                } else {
-                    setErrorMessage('Password is required to access the file');
-                }
+                setErrorMessage('Password is required to access the file');
             } else {
                 setErrorMessage('Error accessing file');
             }
