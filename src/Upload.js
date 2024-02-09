@@ -60,8 +60,8 @@ const Upload = () => {
                 <div className="col-md-6 mt-3">
                     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                     {uploadLink && ( // Display the link if it exists
-                        <div className="alert alert-success">
-                            File uploaded successfully. Access link: <a href={uploadLink}>{uploadLink}</a>
+                        <div className="alert alert-success container">
+                            File uploaded successfully. Access link: {uploadLink}
                         </div>
                     )}
                     <div className="form-group mt-3">

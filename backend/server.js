@@ -68,7 +68,7 @@ app.get('/files/:accessLink', async (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        if (file.expiryDate && new Date() > file.expiryDate) {
+        if (file.expiryDate < new Date()) {
             return res.status(403).json({ error: 'File link has expired' });
         }
 
@@ -94,7 +94,7 @@ app.get('/files/:accessLink', async (req, res) => {
         if (!contentType) {
             return res.status(500).json({ error: 'Unsupported file type' });
         }
-
+        
         // Set headers for previewing the file
         res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
         res.setHeader('Content-Type', contentType);
@@ -121,6 +121,7 @@ function getContentType(fileExtension) {
             return 'application/vnd.ms-excel';
         case '.jpg':
         case '.jpeg':
+        case '.jfif': // Adding support for JFIF
             return 'image/jpeg';
         case '.png':
             return 'image/png';
@@ -134,6 +135,7 @@ function getContentType(fileExtension) {
         default:
             return null; // Unknown file type
     }
+    
 }
 
 
