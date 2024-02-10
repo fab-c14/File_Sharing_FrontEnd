@@ -19,7 +19,7 @@ const FileAccess = () => {
             return;
         }
     
-        fetch(`https://3002-fabc14-filesharing-x7esvkougck.ws-us108.gitpod.io/files/${link}?password=${password}`, {
+        fetch(`https://3002-fabc14-filesharing-xgtdu2tg3y7.ws-us108.gitpod.io/files/${link}?password=${password}`, {
             method: 'GET', // Change the method to GET
         })
         .then(response => {

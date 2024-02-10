@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import 'tachyons';
 const Upload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [password, setPassword] = useState('');
@@ -30,7 +30,7 @@ const Upload = () => {
         formData.append('password', password);
         formData.append('expiryDate', expiryDate);
 
-        fetch('https://3002-fabc14-filesharing-x7esvkougck.ws-us108.gitpod.io/upload', {
+        fetch('https://3002-fabc14-filesharing-xgtdu2tg3y7.ws-us108.gitpod.io/upload', {
             method: 'POST',
             body: formData
         })
@@ -55,32 +55,32 @@ const Upload = () => {
     };
 
     return (
-        <div className="container">
-            <div className="row justify-content-center">
-                <div className="col-md-6 mt-3">
-                    {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                    {uploadLink && ( // Display the link if it exists
-                        <div className="alert alert-success container">
-                            File uploaded successfully. Access link: {uploadLink}
-                        </div>
-                    )}
-                    <div className="form-group mt-3">
-                        <label htmlFor="fileInput">
-                        <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
-                        </label>
-                    </div>
-                    <div className="form-group mt-3">
-                        <label htmlFor="passwordInput">Password (Optional)</label>
-                        <input type="password" className="form-control" id="passwordInput" value={password} onChange={handlePasswordChange} />
-                    </div>
-                    <div className="form-group mt-3">
-                        <label htmlFor="expiryDateInput">Expiry Date and Time (Optional)</label>
-                        <input type="datetime-local" className="form-control" id="expiryDateInput" value={expiryDate} onChange={handleExpiryDateChange} />
-                    </div>
-                    <button className="btn btn-primary mt-3" onClick={handleUpload}>Upload</button>
+<div className="container center">
+    <div className="row justify-content-center align-items-center">
+        <div className="col-md-6 mt-3">
+            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+            {uploadLink && ( // Display the link if it exists
+                <div className="alert alert-success container">
+                    File uploaded successfully. Access link: {uploadLink}
                 </div>
+            )}
+            <div className="form-group mt-3">
+                <label htmlFor="fileInput">
+                <input type="file" className="form-control-file" id="fileInput" onChange={handleFileChange} />
+                </label>
             </div>
+            <div className="form-group mt-3">
+                <label htmlFor="passwordInput">Password (Optional)</label>
+                <input type="password" className="form-control" id="passwordInput" value={password} onChange={handlePasswordChange} />
+            </div>
+            <div className="form-group mt-3">
+                <label htmlFor="expiryDateInput">Expiry Date and Time (Optional)</label>
+                <input type="datetime-local" className="form-control" id="expiryDateInput" value={expiryDate} onChange={handleExpiryDateChange} />
+            </div>
+            <button className="btn btn-primary mt-3" onClick={handleUpload}>Upload</button>
         </div>
+    </div>
+</div>
     );
 };
 
