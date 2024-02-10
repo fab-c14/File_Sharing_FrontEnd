@@ -5,10 +5,14 @@
 
 .App {
   text-align: center;
+  
 }
 
+
+
 .home-page {
-  margin-top: 100px;
+  margin-top:50vh;
+  
 }
 
 .tilt-in-fwd-tr {

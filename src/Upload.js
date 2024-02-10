@@ -6,6 +6,7 @@ const Upload = () => {
     const [expiryDate, setExpiryDate] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [uploadLink, setUploadLink] = useState('');
+    const [hasUploaded, sethasUploaded] = useState(false);
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -43,6 +44,7 @@ const Upload = () => {
         .then(data => {
             console.log('File uploaded successfully:', data);
             setUploadLink(data.accessLink); // Store the upload link in state
+            sethasUploaded(true);
             setSelectedFile(null);
             setPassword('');
             setExpiryDate('');
@@ -59,10 +61,13 @@ const Upload = () => {
     <div className="row justify-content-center align-items-center">
         <div className="col-md-6 mt-3">
             {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-            {uploadLink && ( // Display the link if it exists
-                <div className="alert alert-success container">
-                    File uploaded successfully. Access link: {uploadLink}
+            {hasUploaded && ( // Display the link if it exists
+            <div className="alert alert-success">
+                File uploaded successfully. Access link: 
+                <div className='container-fluid'>
+                    <code>{uploadLink}</code>
                 </div>
+            </div>
             )}
             <div className="form-group mt-3">
                 <label htmlFor="fileInput">
@@ -77,7 +82,7 @@ const Upload = () => {
                 <label htmlFor="expiryDateInput">Expiry Date and Time (Optional)</label>
                 <input type="datetime-local" className="form-control" id="expiryDateInput" value={expiryDate} onChange={handleExpiryDateChange} />
             </div>
-            <button className="btn btn-primary mt-3" onClick={handleUpload}>Upload</button>
+            <button className="btn btn-primary mt-3 ma2 pa2 shadow-2 b" onClick={handleUpload}>Upload</button>
         </div>
     </div>
 </div>

@@ -1,0 +1,8 @@
+flask
+flask_sqlalchemy
+flask_login
+flask_cors
+flask_mail
+mysqlclient
+pymysql
+mysql

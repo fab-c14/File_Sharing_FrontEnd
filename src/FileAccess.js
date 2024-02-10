@@ -66,7 +66,7 @@ const FileAccess = () => {
                         <label htmlFor="passwordInput">Password (Optional)</label>
                         <input type="password" className="form-control" id="passwordInput" value={password} onChange={handlePasswordChange} />
                     </div>
-                    <button onClick={handleFileAccess} className='mr-2 mt-3'>Access File</button>
+                    <button onClick={handleFileAccess} className='mr-2 mt-3 ma2 pa2 shadow-2 b'>Access File</button>
                 </div>
             </div>
         </div>
