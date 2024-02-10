@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FileAccess = () => {
+const FileAccess = ({route,setRoute}) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [link, setLink] = useState('');
     const [password, setPassword] = useState('');
@@ -67,6 +67,8 @@ const FileAccess = () => {
                         <input type="password" className="form-control" id="passwordInput" value={password} onChange={handlePasswordChange} />
                     </div>
                     <button onClick={handleFileAccess} className='mr-2 mt-3 ma2 pa2 shadow-2 b'>Access File</button>
+                    <button className="btn btn-warning mt-3 ma2 pa2 shadow-2 b" onClick={()=>setRoute('upload')}>Upload File</button>
+
                 </div>
             </div>
         </div>

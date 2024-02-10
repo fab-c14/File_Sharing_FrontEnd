@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import 'tachyons';
-const Upload = () => {
+const Upload = ({route,setRoute}) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [password, setPassword] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
@@ -83,6 +83,8 @@ const Upload = () => {
                 <input type="datetime-local" className="form-control" id="expiryDateInput" value={expiryDate} onChange={handleExpiryDateChange} />
             </div>
             <button className="btn btn-primary mt-3 ma2 pa2 shadow-2 b" onClick={handleUpload}>Upload</button>
+            <button className="btn btn-warning mt-3 ma2 pa2 shadow-2 b" onClick={()=>setRoute('fileAccess')}>View File</button>
+
         </div>
     </div>
 </div>

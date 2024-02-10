@@ -18,9 +18,9 @@ const App = () => {
                     <div className="home-page text-center">
                         <h2 className="mb-4 text-pop-up-top f1 grey">Welcome to File Sharing PlateForm</h2>
                         <div className="d-flex justify-content-center">
-                            <button onClick={() => setRoute('upload')} className="btn btn-primary shadow-1 b pa2 ma1">Upload File</button>
+                            <button onClick={() => setRoute('upload')} className="btn btn-primary shadow-1 b pa2 ma1" route={route} setRoute={setRoute}>Upload File</button>
                             {" "}
-                            <button onClick={() => setRoute('fileAccess')} className="btn btn-success  shadow-1 b pa2 ma1">View Files</button>
+                            <button onClick={() => setRoute('fileAccess')} className="btn btn-success  shadow-1 b pa2 ma1" route={route} setRoute={setRoute}>View Files</button>
                         </div>
                     </div>
                 );
