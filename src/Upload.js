@@ -57,7 +57,7 @@ const Upload = ({route,setRoute}) => {
     };
 
     return (
-<div className="container center">
+<div className="container center shadow-1 mt-5 v-md">
     <div className="row justify-content-center align-items-center">
         <div className="col-md-6 mt-3">
             {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}

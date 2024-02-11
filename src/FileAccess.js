@@ -57,7 +57,7 @@ const FileAccess = ({ setRoute }) => {
     
 
     return (
-        <div className='container mt-3'>
+        <div className='container shadow-1 mt-3'>
             <div className="row justify-content-center">
                 <div className="col-md-6 mt-3 ml-2">
                     {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
